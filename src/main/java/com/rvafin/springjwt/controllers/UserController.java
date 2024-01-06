@@ -1,6 +1,5 @@
 package com.rvafin.springjwt.controllers;
 
-import com.rvafin.springjwt.mapper.HistoryMapper;
 import com.rvafin.springjwt.models.History;
 import com.rvafin.springjwt.models.User;
 import com.rvafin.springjwt.payload.response.HistoryDTO;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,8 +20,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private HistoryMapper historyMapper;
 
     @Autowired
     private HistoryRepository historyRepository;
@@ -30,7 +28,12 @@ public class UserController {
     public ResponseEntity<?> getHistory(){
         User user = userService.getAuthenticateUser().get();
         List<History> historyList = historyRepository.getHistoriesByUser(user.getId());
-        List<HistoryDTO> historyDTOList = historyList.stream().map(history -> historyMapper.mapToHistoryDTO(history)).collect(Collectors.toList());
+        List<HistoryDTO> historyDTOList = historyList.stream().map(history -> {
+            HistoryDTO historyDTO = new HistoryDTO();
+            historyDTO.setBody(history.getBody());
+            historyDTO.setDateTimeCreate(history.getDateTimeCreate().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss")));
+            return historyDTO;
+        }).collect(Collectors.toList());
         return ResponseEntity.ok(historyDTOList);
     }
 }

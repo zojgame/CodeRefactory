@@ -61,8 +61,7 @@ public class WebSecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .cors(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(auth -> 
-          auth.requestMatchers("/auth/**").permitAll()
-              .requestMatchers("/request/**").permitAll()
+          auth.requestMatchers("/auth/**", "/request/**").permitAll()
               .anyRequest().authenticated()
         );
     

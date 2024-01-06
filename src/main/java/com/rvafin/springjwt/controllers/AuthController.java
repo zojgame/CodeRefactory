@@ -19,13 +19,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rvafin.springjwt.models.Role;
 import com.rvafin.springjwt.models.User;
 import com.rvafin.springjwt.payload.request.LoginRequest;
 import com.rvafin.springjwt.payload.request.SignupRequest;
 import com.rvafin.springjwt.payload.response.JwtResponse;
 import com.rvafin.springjwt.payload.response.MessageResponse;
-import com.rvafin.springjwt.repository.RoleRepository;
 import com.rvafin.springjwt.repository.UserRepository;
 import com.rvafin.springjwt.security.jwt.JwtUtils;
 import com.rvafin.springjwt.security.services.UserDetailsImpl;
@@ -39,9 +37,6 @@ public class AuthController {
 
   @Autowired
   UserRepository userRepository;
-
-  @Autowired
-  RoleRepository roleRepository;
 
   @Autowired
   PasswordEncoder encoder;
@@ -58,10 +53,7 @@ public class AuthController {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtUtils.generateJwtToken(authentication);
     
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();    
-    List<String> roles = userDetails.getAuthorities().stream()
-        .map(item -> item.getAuthority())
-        .collect(Collectors.toList());
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
     return ResponseEntity.ok(new JwtResponse(jwt, 
                          userDetails.getId(), 
@@ -76,11 +68,8 @@ public class AuthController {
           .body(new MessageResponse("Error: Username is already taken!"));
     }
 
-    // Create new user's account
-    User user = new User(signUpRequest.getUsername(), 
-               signUpRequest.getEmail(),
+    User user = new User(signUpRequest.getUsername(),
                encoder.encode(signUpRequest.getPassword()));
-    user.setRoles(new HashSet<>(List.of(new Role())));
     userRepository.save(user);
 
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));

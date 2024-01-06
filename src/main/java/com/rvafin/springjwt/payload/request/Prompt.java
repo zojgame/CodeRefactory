@@ -43,6 +43,6 @@ public class Prompt {
 
     @Override
     public String toString(){
-        return "Hello";
+        return "";
     }
 }
