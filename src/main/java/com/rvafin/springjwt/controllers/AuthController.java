@@ -2,7 +2,6 @@ package com.rvafin.springjwt.controllers;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.validation.Valid;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rvafin.springjwt.models.ERole;
 import com.rvafin.springjwt.models.Role;
 import com.rvafin.springjwt.models.User;
 import com.rvafin.springjwt.payload.request.LoginRequest;
@@ -67,9 +65,7 @@ public class AuthController {
 
     return ResponseEntity.ok(new JwtResponse(jwt, 
                          userDetails.getId(), 
-                         userDetails.getUsername(), 
-                         userDetails.getEmail(), 
-                         roles));
+                         userDetails.getUsername()));
   }
 
   @PostMapping("/signup")
@@ -80,17 +76,11 @@ public class AuthController {
           .body(new MessageResponse("Error: Username is already taken!"));
     }
 
-    if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-      return ResponseEntity
-          .badRequest()
-          .body(new MessageResponse("Error: Email is already in use!"));
-    }
-
     // Create new user's account
     User user = new User(signUpRequest.getUsername(), 
                signUpRequest.getEmail(),
                encoder.encode(signUpRequest.getPassword()));
-
+    user.setRoles(new HashSet<>(List.of(new Role())));
     userRepository.save(user);
 
     return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
